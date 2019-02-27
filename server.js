@@ -7,11 +7,9 @@ const jwt = require('jsonwebtoken'); //Token 1. import it
 
 const UsersDB = require('./usersHelpers.js');
 
-// Token - defined the secret
-const secret = process.env.JWT_SECRET || 'this really should not be in the server code!'; // place in .env file (can be anything)
-
 
 const server = express(); // creates the server / creates an express application using the express module
+
 
 server.use(helmet());
 server.use(express.json());
@@ -43,7 +41,41 @@ server.post('/api/register', (req, res) => {
         });
 });
 
+
 // Token - add this function to generate 
+function generateToken(user) {
+    const payload = {
+        subject: user.id, //sub in payload is what the token is about        
+    };
+    // Token - defined the secret
+    const secret = process.env.JWT_SECRET || 'this really should not be in the server code!'; // place in .env file (can be anything)
+    
+    const options = {
+        expiresIn: '1d',
+    };
+
+    return jwt.sign(payload, secret, options);
+};
+
+
+server.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+  
+    UsersDB.findBy({ username })
+        .first()
+        .then(user => {
+            // check that passwords match
+            if (user && bcrypt.compareSync(password, user.password)) {
+            const token = generateToken(user); // Token - generate new token
+            res.status(200).json({ message: `Welcome ${user.username}, have a token!`, token }); // Token - return new token. remove secret and roles - for test (authorization demo)
+            } else {
+            res.status(401).json({ message: 'Invalid Credentials. YOU SHALL NOT PASS!' });
+            }
+        })
+        .catch(error => {
+            res.status(500).json(error);
+        });
+});
 
 
 
