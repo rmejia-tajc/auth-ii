@@ -11,9 +11,16 @@ const UsersDB = require('./usersHelpers.js');
 const server = express(); // creates the server / creates an express application using the express module
 
 
+// Token - defined the secret
+const secret = process.env.JWT_SECRET || 'this really should not be in the server code!'; // place in .env file (can be anything)
+
+
 server.use(helmet());
 server.use(express.json());
 server.use(cors());
+
+
+
 
 
 server.get('/', async (req, res) => {
@@ -47,8 +54,6 @@ function generateToken(user) {
     const payload = {
         subject: user.id, //sub in payload is what the token is about        
     };
-    // Token - defined the secret
-    const secret = process.env.JWT_SECRET || 'this really should not be in the server code!'; // place in .env file (can be anything)
     
     const options = {
         expiresIn: '1d',
@@ -78,7 +83,33 @@ server.post('/api/login', (req, res) => {
 });
 
 
+function restricted(req, res, next) {
+    const token = req.headers.authorization;
+  
+    if(token) {
+      // is it valid?
+      jwt.verify(token, secret, err => {
+        if (err) {
+          res.status(401).json({ you: "Can't touch this" , err});
+        } else {
+          next();
+        }
+      });
+    } else {
+      res.status(401).json({ you: 'shall not pass'});
+    }
+  }
 
+
+server.get('/api/users', restricted, async (req, res) => {
+    try {
+      const users = await UsersDB.find();
+  
+      res.json(users);
+    } catch (error) {
+      res.send(error);
+    }
+});
 
 
 
