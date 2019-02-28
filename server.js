@@ -20,9 +20,6 @@ server.use(express.json());
 server.use(cors());
 
 
-
-
-
 server.get('/', async (req, res) => {
     res.send(`
       <h1>SANITY CHECK!</h1>
@@ -90,15 +87,15 @@ function restricted(req, res, next) {
       // is it valid?
       jwt.verify(token, secret, err => {
         if (err) {
-          res.status(401).json({ you: "Can't touch this" , err});
+          res.status(401).json({ you: "Can't touch this!" , err});
         } else {
           next();
         }
       });
     } else {
-      res.status(401).json({ you: 'shall not pass'});
+      res.status(401).json({ you: 'SHALL NOT PASS!'});
     }
-  }
+}
 
 
 server.get('/api/users', restricted, async (req, res) => {
@@ -110,15 +107,6 @@ server.get('/api/users', restricted, async (req, res) => {
       res.send(error);
     }
 });
-
-
-
-
-
-
-
-
-
 
 
 
