@@ -4,13 +4,14 @@ import axios from "axios";
 class Login extends React.Component {
   state = {
     username: "",
-    password: ""
+    password: "",
+    department: "",
   };
 
   render() {
     return (
       <>
-        <h2>Login</h2>
+        <h2>Register</h2>
         <form onSubmit={this.handleSubmit}>
           <div>
             <label htmlFor="username" />
@@ -34,6 +35,17 @@ class Login extends React.Component {
               placeholder="password"
             />
           </div>
+          <div>
+            <label htmlFor="department" />
+            <input
+              name="department"
+              id="department"
+              value={this.state.department}
+              onChange={this.handleInputChange}
+              type="text"
+              placeholder="department"
+            />
+          </div>
 
           <div>
             <button type="submit">Login</button>
@@ -53,11 +65,11 @@ class Login extends React.Component {
     event.preventDefault();
 
     axios
-      .post("/login" , this.state)
+      .post("/register" , this.state)
       .then(res => {
         localStorage.setItem("jwt", res.data.token);
 
-        this.props.history.push("/users");
+        this.props.history.push("/login");
       })
       .catch(error => console.error(error));
   };
